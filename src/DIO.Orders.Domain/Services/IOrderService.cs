@@ -20,9 +20,16 @@ namespace DIO.Orders.Domain.Services
         /// Remove the products from a given <see cref="Order"/>.
         /// </summary>
         /// <param name="orderId">The <see cref="Order"/> identifier to remove the <see cref="Product"/>s.</param>
-        /// <param name="productIds">The <see cref="Product"/> identifiers to be removed.</param>
         /// <returns>The number of <see cref="Product"/>s removed.</returns>
-        int RemoveProductsFrom(int orderId, List<int> productIds);
+        int RemoveProductsFrom(int orderId);
+
+        /// <summary>
+        /// Remove the products from a given <see cref="Order"/>.
+        /// </summary>
+        /// <param name="orderId">The <see cref="Order"/> identifier to remove the <see cref="Product"/>s.</param>
+        /// <param name="productId">The <see cref="Product"/> identifier to remove from the <see cref="Order"/>.</param>
+        /// <returns>The number of <see cref="Product"/>s removed.</returns>
+        int RemoveProductFrom(int orderId, int productId);
 
         /// <summary>
         /// Include new products into a given <see cref="Order"/>.

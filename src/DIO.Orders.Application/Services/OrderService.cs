@@ -64,12 +64,22 @@ namespace DIO.Orders.Application.Services
         }
 
         /// <inheritdoc />
-        public int RemoveProductsFrom(int orderId, List<int> productIds)
+        public int RemoveProductsFrom(int orderId)
         {
-            if (!_productRepository.ContainsAll(productIds)) return 0;
             if (!Repository.TryGetFirst(storedItem => storedItem.IsId(orderId), out var order)) return 0;
 
-            var productsRemoved = order.RemoveProducts(productIds);
+            var productsRemoved = order.RemoveProducts();
+
+            return Repository.AddOrUpdate(order) == orderId
+                    ? productsRemoved
+                    : 0;
+        }
+        public int RemoveProductFrom(int orderId, int productId)
+        {
+            if (!_productRepository.Contains(productId)) return 0;
+            if (!Repository.TryGetFirst(storedItem => storedItem.IsId(orderId), out var order)) return 0;
+
+            var productsRemoved = order.RemoveProduct(productId);
 
             return Repository.AddOrUpdate(order) == orderId
                     ? productsRemoved

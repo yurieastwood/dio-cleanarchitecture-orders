@@ -41,21 +41,21 @@ namespace DIO.Orders.API.Controllers
         /// </summary>
         /// <param name="id">An integer value representing the Order that should be selected.</param>
         /// <returns>The <see cref="Order"/> selected from repository.</returns>
-        [HttpGet("{id:int}")]
+        [HttpGet("{orderId:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Order))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
-        public IActionResult Get(int id) => SafeExecutionForUniqueItems(() => _orderService.Get(id));
+        public IActionResult Get([FromQuery] int orderId) => SafeExecutionForUniqueItems(() => _orderService.Get(orderId));
 
         /// <summary>
         /// Retrieve a <see cref="Order"/> from repository based on the given identifier in a printable mode.
         /// </summary>
         /// <param name="id">An integer value representing the Order that should be selected.</param>
         /// <returns>An string representing a printable mode of the <see cref="Order"/> retrieved.</returns>
-        [HttpGet("{id:int}/Print")]
+        [HttpGet("{orderId:int}/Print")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
-        public IActionResult Print(int id) => SafeExecutionOkAndBadRequest(() => _orderService.Print(id));
+        public IActionResult Print([FromQuery] int orderId) => SafeExecutionOkAndBadRequest(() => _orderService.Print(orderId));
 
         /// <summary>
         /// Creates an <see cref="Order"/> instance and include it into the repository.
@@ -63,7 +63,7 @@ namespace DIO.Orders.API.Controllers
         /// <param name="customerId">The <see cref="Customer"/> identifier that requested the <see cref="Order"/>.</param>
         /// <param name="productIds">A <see cref="List{T}"/> of <see cref="Product"/> identifiers to start the <see cref="Order"/>.</param>
         /// <returns>An integer representing the new <see cref="Order"/> identifier added.</returns>
-        [HttpPost]
+        [HttpPut]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(int))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
         public IActionResult Create(int customerId, List<int> productIds)
@@ -91,10 +91,10 @@ namespace DIO.Orders.API.Controllers
         /// <param name="id">The <see cref="Order"/> identifier to include the <see cref="Product"/>s.</param>
         /// <param name="productIds">The <see cref="List{T}"/> <see cref="Product"/> identifiers to be included into the <see cref="Order"/>.</param>
         /// <returns>True when the item was updated successfully and the new <see cref="Product"/>s was included.</returns>
-        [HttpPut("{id:int}/AddProducts")]
+        [HttpPost("{orderId:int}/Products")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
-        public IActionResult AddProducts(int id, List<int> productIds) => SafeExecutionOkAndBadRequest(() => _orderService.AddProductsTo(id, productIds));
+        public IActionResult AddProducts(int orderId, List<int> productIds) => SafeExecutionOkAndBadRequest(() => _orderService.AddProductsTo(orderId, productIds));
 
         /// <summary>
         /// Remove the <see cref="Product"/>s from an existent <see cref="Order"/> based on the given order identifier.
@@ -102,10 +102,21 @@ namespace DIO.Orders.API.Controllers
         /// <param name="id">The <see cref="Order"/> identifier to remove the <see cref="Product"/>s.</param>
         /// <param name="productIds">The <see cref="List{T}"/> <see cref="Product"/> identifiers to be removed from the <see cref="Order"/>.</param>
         /// <returns>The quantity of <see cref="Product"/>s was removed.</returns>
-        [HttpPut("{id:int}/RemoveProducts")]
+        [HttpDelete("{orderId:int}/Products")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
-        public IActionResult RemoveProducts(int id, List<int> productIds) => SafeExecutionOkAndBadRequest(() => _orderService.RemoveProductsFrom(id, productIds));
+        public IActionResult RemoveProducts([FromQuery] int orderId) => SafeExecutionOkAndBadRequest(() => _orderService.RemoveProductsFrom(orderId));
+
+        /// <summary>
+        /// Remove the <see cref="Product"/>s from an existent <see cref="Order"/> based on the given order identifier.
+        /// </summary>
+        /// <param name="id">The <see cref="Order"/> identifier to remove the <see cref="Product"/>s.</param>
+        /// <param name="productId">The <see cref="List{T}"/> <see cref="Product"/> identifiers to be removed from the <see cref="Order"/>.</param>
+        /// <returns>The quantity of <see cref="Product"/>s was removed.</returns>
+        [HttpDelete("{orderId:int}/Products/{productId:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
+        public IActionResult RemoveProduct([FromQuery] int orderId, [FromQuery] int productId) => SafeExecutionOkAndBadRequest(() => _orderService.RemoveProductFrom(orderId, productId));
 
         /// <summary>
         /// Apply the given <see cref="Promotion"/>s into an existent <see cref="Order"/> based on the given order identifier.
@@ -113,19 +124,19 @@ namespace DIO.Orders.API.Controllers
         /// <param name="id">The <see cref="Order"/> identifier to remove the <see cref="Product"/>s.</param>
         /// <param name="promotionId">The <see cref="Promotion"/> identifier to be applied into the given <see cref="Order"/>.</param>
         /// <returns>The amount of discount applied into the given <see cref="Order"/>.</returns>
-        [HttpPut("{id:int}/ApplyPromotion")]
+        [HttpPost("{orderId:int}/Promotion")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(double))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
-        public IActionResult ApplyPromotion(int id, int promotionId) => SafeExecutionOkAndBadRequest(() => _orderService.ApplyPromotionTo(id, promotionId));
+        public IActionResult ApplyPromotion(int orderId, int promotionId) => SafeExecutionOkAndBadRequest(() => _orderService.ApplyPromotionTo(orderId, promotionId));
 
         /// <summary>
         /// Remove a <see cref="Order"/> instance from repository.
         /// </summary>
         /// <param name="id">The <see cref="Order"/> identifier to be removed.</param>
         /// <returns>True when the <see cref="Order"/> was removed successfully.</returns>
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{orderId:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
-        public IActionResult Delete(int id) => SafeExecutionOkAndBadRequest(() => _orderService.Delete(id));
+        public IActionResult Delete(int orderId) => SafeExecutionOkAndBadRequest(() => _orderService.Delete(orderId));
     }
 }

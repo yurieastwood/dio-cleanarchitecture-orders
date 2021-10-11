@@ -78,27 +78,32 @@ namespace DIO.Orders.Domain.Models
         }
 
         /// <summary>
-        /// Remove a <see cref="Product"/> from the products list based on the given product id.
+        /// Remove all <see cref="Product"/>s from the products list.
         /// </summary>
-        /// <param name="productIds">The <see cref="List{T}"/> of <see cref="Product"/> identifiers that should be removed.</param>
         /// <returns>The quantity of <see cref="Product"/>s removed.</returns>
-        public int RemoveProducts(List<int> productIds)
+        public int RemoveProducts()
         {
-            var productsIdsToRemove = productIds.Where(id => id > 0).ToList();
-            if (!productsIdsToRemove.Any()) return 0;
-
-            var productsDeleted = 0;
-            Products
-                .Where(product => productsIdsToRemove.Contains(product.Id ?? -1))
-                .ToList()
-                .ForEach(product =>
-                {
-                    Products.Remove(product);
-                    productsDeleted++;
-                });
+            var productsDeleted = Products.Count();
+            Products.Clear();
 
             CalculateTotals();
             return productsDeleted;
+        }
+
+        /// <summary>
+        /// Remove a <see cref="Product"/> from the products list based on the given product id.
+        /// </summary>
+        /// <param name="productId">The <see cref="Product"/> identifier that should be removed.</param>
+        /// <returns>True if the product was removed, false if failed or doesn't exist.</returns>
+        public int RemoveProduct(int productId)
+        {
+            var productToRemove = Products
+                .Where(product => product.Id == productId)
+                .FirstOrDefault();
+            var productRemoved = Products.Remove(productToRemove);
+            CalculateTotals();
+
+            return productRemoved ? 1 : 0;
         }
 
         /// <summary>
